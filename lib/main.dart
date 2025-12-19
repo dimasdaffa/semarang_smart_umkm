@@ -393,6 +393,79 @@ class DashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
+            const SizedBox(height: 20),
+
+            // Map Preview Section
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Sebaran Lokasi UMKM",
+                            style: GoogleFonts.poppins(
+                                fontSize: 16, fontWeight: FontWeight.w600)),
+                        TextButton(
+                          onPressed: () {
+                             // Assuming standard navigation, though in this simple main.dart structure 
+                             // we might need a specific way to switch tabs if desired.
+                             // For now, just a visual indicator or simple print as this acts as preview.
+                             // Ideally, this could switch the bottom nav index.
+                          }, 
+                          child: const Text("Lihat Full Map")
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 300,
+                    child: FlutterMap(
+                      options: const MapOptions(
+                        initialCenter: LatLng(-6.9932, 110.4203), // Semarang Center
+                        initialZoom: 12.0,
+                        interactionOptions: InteractionOptions(
+                          flags: InteractiveFlag.none, // Static preview
+                        ),
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.example.semarang_umkm_map',
+                        ),
+                        MarkerLayer(
+                          markers: umkmProvider.umkmList.map((umkm) {
+                            return Marker(
+                              point: umkm.lokasi,
+                              width: 8,
+                              height: 8,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: umkm.getStatusColor(),
+                                  shape: BoxShape.circle,
+                                  boxShadow: const [
+                                     BoxShadow(
+                                      color: Colors.black26, 
+                                      blurRadius: 2, 
+                                      offset: Offset(0, 1)
+                                    )
+                                  ]
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
             // Chart Section
             Card(
               child: Padding(
