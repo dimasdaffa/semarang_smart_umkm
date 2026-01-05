@@ -2,6 +2,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:semarang_umkm_map/main.dart';
+import 'package:semarang_umkm_map/presentation/providers/umkm_provider.dart';
+import 'package:semarang_umkm_map/presentation/providers/sentra_provider.dart';
 
 void main() {
   testWidgets('Smoke test', (WidgetTester tester) async {
@@ -10,6 +12,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => UmkmProvider()),
+          ChangeNotifierProvider(create: (_) => SentraProvider()),
         ],
         child: const SemarangSmartApp(),
       ),

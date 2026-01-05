@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -8,11 +7,25 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
 
+// Data imports
+import 'data/models/umkm.dart';
+import 'data/models/bahan_baku.dart';
+import 'data/models/alat_produksi.dart';
+import 'data/mock/mock_catalogs.dart';
+
+// Provider imports
+import 'presentation/providers/umkm_provider.dart';
+import 'presentation/providers/sentra_provider.dart';
+
+// Page imports
+import 'presentation/pages/sentra_list_page.dart';
+
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UmkmProvider()),
+        ChangeNotifierProvider(create: (_) => SentraProvider()),
       ],
       child: const SemarangSmartApp(),
     ),
@@ -20,164 +33,7 @@ void main() {
 }
 
 /// --------------------------------------------------------------------------
-/// 1. MODEL & DATA
-/// --------------------------------------------------------------------------
-
-enum UmkmStatus { mandiri, berkembang, perluBantuan }
-
-class Umkm {
-  final String id;
-  final String nama;
-  final String kategori;
-  final double omzet;
-  final LatLng lokasi;
-  final String alamat;
-
-  Umkm({
-    required this.id,
-    required this.nama,
-    required this.kategori,
-    required this.omzet,
-    required this.lokasi,
-    required this.alamat,
-  });
-
-  /// "BAU AI" Logic: Analyze Health based on Omzet
-  UmkmStatus analyzeUmkmHealth() {
-    if (omzet > 200000000) return UmkmStatus.mandiri;
-    if (omzet >= 50000000) return UmkmStatus.berkembang;
-    return UmkmStatus.perluBantuan;
-  }
-
-  Color getStatusColor() {
-    switch (analyzeUmkmHealth()) {
-      case UmkmStatus.mandiri:
-        return Colors.green;
-      case UmkmStatus.berkembang:
-        return Colors.amber;
-      case UmkmStatus.perluBantuan:
-        return Colors.red;
-    }
-  }
-
-  String getStatusText() {
-    switch (analyzeUmkmHealth()) {
-      case UmkmStatus.mandiri:
-        return "Mandiri";
-      case UmkmStatus.berkembang:
-        return "Berkembang";
-      case UmkmStatus.perluBantuan:
-        return "Perlu Bantuan";
-    }
-  }
-}
-
-class UmkmProvider extends ChangeNotifier {
-  final List<Umkm> _umkmList = [
-    Umkm(
-      id: '1',
-      nama: "Lumpia Gang Lombok",
-      kategori: "Kuliner",
-      omzet: 150000000,
-      lokasi: const LatLng(-6.9744, 110.4263),
-      alamat: "Gg. Lombok No.11, Purwodinatan",
-    ),
-    Umkm(
-      id: '2',
-      nama: "Bandeng Juwana Elrina",
-      kategori: "Oleh-oleh",
-      omzet: 500000000,
-      lokasi: const LatLng(-6.9890, 110.4100),
-      alamat: "Jl. Pandanaran No.57",
-    ),
-    Umkm(
-      id: '3',
-      nama: "Soto Bangkong",
-      kategori: "Kuliner",
-      omzet: 250000000,
-      lokasi: const LatLng(-6.9961, 110.4300),
-      alamat: "Jl. Bridjen Katamso",
-    ),
-    Umkm(
-      id: '4',
-      nama: "Tahu Bakso Ungaran (Cabang Kota)",
-      kategori: "Oleh-oleh",
-      omzet: 45000000, // Perlu Bantuan
-      lokasi: const LatLng(-7.0000, 110.4200),
-      alamat: "Sekitar Simpang Lima",
-    ),
-    Umkm(
-      id: '5',
-      nama: "Batik Semarang Indah",
-      kategori: "Fashion",
-      omzet: 80000000,
-      lokasi: const LatLng(-6.9800, 110.4350),
-      alamat: "Kawasan Kota Lama",
-    ),
-    Umkm(
-      id: '6',
-      nama: "Warung Makan Mbok Berek",
-      kategori: "Kuliner",
-      omzet: 30000000, // Perlu Bantuan
-      lokasi: const LatLng(-6.9850, 110.4000),
-      alamat: "Jl. Jendral Sudirman",
-    ),
-    Umkm(
-      id: '7',
-      nama: "Kerajinan Rotan Khas",
-      kategori: "Kriya",
-      omzet: 60000000,
-      lokasi: const LatLng(-6.9920, 110.4150),
-      alamat: "Dekat Tugu Muda",
-    ),
-    Umkm(
-      id: '8',
-      nama: "Wingko Babat Kereta Api",
-      kategori: "Oleh-oleh",
-      omzet: 220000000,
-      lokasi: const LatLng(-6.9680, 110.4230),
-      alamat: "Stasiun Tawang Area",
-    ),
-    Umkm(
-      id: '9',
-      nama: "Kopi Banaran Point",
-      kategori: "Kuliner",
-      omzet: 180000000,
-      lokasi: const LatLng(-6.9900, 110.4050),
-      alamat: "Jl. Pemuda",
-    ),
-    Umkm(
-      id: '10',
-      nama: "Souvenir Kaos Semarang",
-      kategori: "Fashion",
-      omzet: 40000000, // Perlu Bantuan
-      lokasi: const LatLng(-6.9950, 110.4250),
-      alamat: "Simpang Lima Area Plaza",
-    ),
-  ];
-
-  List<Umkm> get umkmList => _umkmList;
-
-  void addUmkm(Umkm umkm) {
-    _umkmList.add(umkm);
-    notifyListeners();
-  }
-
-  // Helper Stats
-  double get totalOmzet => _umkmList.fold(0, (sum, item) => sum + item.omzet);
-  int get totalUmkm => _umkmList.length;
-
-  Map<String, int> get categoryCounts {
-    final map = <String, int>{};
-    for (var u in _umkmList) {
-      map[u.kategori] = (map[u.kategori] ?? 0) + 1;
-    }
-    return map;
-  }
-}
-
-/// --------------------------------------------------------------------------
-/// 2. MAIN APP & THEME
+/// MAIN APP & THEME
 /// --------------------------------------------------------------------------
 
 class SemarangSmartApp extends StatelessWidget {
@@ -190,7 +46,7 @@ class SemarangSmartApp extends StatelessWidget {
       title: 'Semarang Smart UMKM',
       theme: ThemeData(
         useMaterial3: true,
-        primaryColor: const Color(0xFF0D47A1), // Deep Blue
+        primaryColor: const Color(0xFF0D47A1),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF0D47A1),
           primary: const Color(0xFF0D47A1),
@@ -235,6 +91,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     const DashboardPage(),
     const SmartMapPage(),
+    const SentraListPage(), // NEW: Sentra Production Page
     const InputDataPage(),
   ];
 
@@ -273,6 +130,11 @@ class _MainPageState extends State<MainPage> {
               label: 'Smart Map',
             ),
             NavigationDestination(
+              icon: Icon(Icons.hub_outlined),
+              selectedIcon: Icon(Icons.hub, color: Color(0xFF0D47A1)),
+              label: 'Sentra',
+            ),
+            NavigationDestination(
               icon: Icon(Icons.add_circle_outline),
               selectedIcon: Icon(Icons.add_circle, color: Color(0xFF0D47A1)),
               label: 'Input Data',
@@ -285,7 +147,7 @@ class _MainPageState extends State<MainPage> {
 }
 
 /// --------------------------------------------------------------------------
-/// 3. DASHBOARD PAGE
+/// DASHBOARD PAGE
 /// --------------------------------------------------------------------------
 
 class DashboardPage extends StatelessWidget {
@@ -294,6 +156,7 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final umkmProvider = Provider.of<UmkmProvider>(context);
+    final sentraProvider = Provider.of<SentraProvider>(context);
     final currencyFormatter =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
@@ -302,7 +165,9 @@ class DashboardPage extends StatelessWidget {
         .where((u) => u.analyzeUmkmHealth() == UmkmStatus.perluBantuan)
         .length;
     double percentagePerluBantuan =
-        (perluBantuanCount / umkmProvider.totalUmkm) * 100;
+        umkmProvider.totalUmkm > 0 
+          ? (perluBantuanCount / umkmProvider.totalUmkm) * 100 
+          : 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Dashboard Eksekutif")),
@@ -313,7 +178,7 @@ class DashboardPage extends StatelessWidget {
           children: [
             // Welcome Section
             Text(
-              "Selamat Datang, Dimas Daffa",
+              "Selamat Datang",
               style: GoogleFonts.poppins(
                   fontSize: 14, color: Colors.grey[600]),
             ),
@@ -325,7 +190,7 @@ class DashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Summary Cards
+            // Summary Cards Row 1
             Row(
               children: [
                 Expanded(
@@ -345,6 +210,32 @@ class DashboardPage extends StatelessWidget {
                     currencyFormatter.format(umkmProvider.totalOmzet),
                     Icons.monetization_on,
                     Colors.green,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Summary Cards Row 2 - NEW: Sentra Stats
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSummaryCard(
+                    context,
+                    "Sentra Produksi",
+                    "${sentraProvider.totalSentra} Sentra",
+                    Icons.hub,
+                    Colors.purple,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildSummaryCard(
+                    context,
+                    "UMKM Tergabung",
+                    "${sentraProvider.totalUmkmInSentra} Unit",
+                    Icons.groups,
+                    Colors.orange,
                   ),
                 ),
               ],
@@ -384,15 +275,15 @@ class DashboardPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Terdeteksi ${percentagePerluBantuan.toStringAsFixed(1)}% UMKM berada dalam kategori 'Perlu Bantuan'. Disarankan untuk membuka program KUR Daerag prioritas untuk sektor ${umkmProvider.umkmList.where((u) => u.analyzeUmkmHealth() == UmkmStatus.perluBantuan).firstOrNull?.kategori ?? 'Terkait'}.",
+                    "Terdeteksi ${percentagePerluBantuan.toStringAsFixed(1)}% UMKM dalam kategori 'Perlu Bantuan'. "
+                    "${sentraProvider.totalSentra} sentra produksi teridentifikasi berdasarkan kesamaan bahan baku dan alat produksi. "
+                    "Disarankan program KUR prioritas dan pengadaan bahan baku bersama.",
                     style:
                         GoogleFonts.poppins(color: Colors.white.withOpacity(0.9)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-
             const SizedBox(height: 20),
 
             // Map Preview Section
@@ -409,26 +300,20 @@ class DashboardPage extends StatelessWidget {
                         Text("Sebaran Lokasi UMKM",
                             style: GoogleFonts.poppins(
                                 fontSize: 16, fontWeight: FontWeight.w600)),
-                        TextButton(
-                          onPressed: () {
-                             // Assuming standard navigation, though in this simple main.dart structure 
-                             // we might need a specific way to switch tabs if desired.
-                             // For now, just a visual indicator or simple print as this acts as preview.
-                             // Ideally, this could switch the bottom nav index.
-                          }, 
-                          child: const Text("Lihat Full Map")
-                        ),
+                        const Text("Lihat Full Map",
+                            style: TextStyle(
+                                color: Color(0xFF0D47A1), fontSize: 12)),
                       ],
                     ),
                   ),
                   SizedBox(
-                    height: 300,
+                    height: 250,
                     child: FlutterMap(
                       options: const MapOptions(
-                        initialCenter: LatLng(-6.9932, 110.4203), // Semarang Center
+                        initialCenter: LatLng(-6.9932, 110.4203),
                         initialZoom: 12.0,
                         interactionOptions: InteractionOptions(
-                          flags: InteractiveFlag.none, // Static preview
+                          flags: InteractiveFlag.none,
                         ),
                       ),
                       children: [
@@ -440,19 +325,19 @@ class DashboardPage extends StatelessWidget {
                           markers: umkmProvider.umkmList.map((umkm) {
                             return Marker(
                               point: umkm.lokasi,
-                              width: 8,
-                              height: 8,
+                              width: 10,
+                              height: 10,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: umkm.getStatusColor(),
+                                  color: _getStatusColor(umkm.analyzeUmkmHealth()),
                                   shape: BoxShape.circle,
                                   boxShadow: const [
-                                     BoxShadow(
-                                      color: Colors.black26, 
-                                      blurRadius: 2, 
-                                      offset: Offset(0, 1)
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1),
                                     )
-                                  ]
+                                  ],
                                 ),
                               ),
                             );
@@ -514,10 +399,23 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
+  Color _getStatusColor(UmkmStatus status) {
+    switch (status) {
+      case UmkmStatus.mandiri:
+        return Colors.green;
+      case UmkmStatus.berkembang:
+        return Colors.amber;
+      case UmkmStatus.perluBantuan:
+        return Colors.red;
+    }
+  }
+
   List<PieChartSectionData> _buildChartSections(UmkmProvider provider) {
     final counts = provider.categoryCounts;
     final total = provider.totalUmkm;
-    
+
+    if (total == 0) return [];
+
     return counts.entries.map((entry) {
       final percentage = (entry.value / total) * 100;
       return PieChartSectionData(
@@ -533,11 +431,16 @@ class DashboardPage extends StatelessWidget {
 
   Color _getColorForCategory(String category) {
     switch (category) {
-      case 'Kuliner': return Colors.orange;
-      case 'Oleh-oleh': return Colors.blue;
-      case 'Fashion': return Colors.pink;
-      case 'Kriya': return Colors.purple;
-      default: return Colors.grey;
+      case 'Kuliner':
+        return Colors.orange;
+      case 'Oleh-oleh':
+        return Colors.blue;
+      case 'Fashion':
+        return Colors.pink;
+      case 'Kriya':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -559,7 +462,10 @@ class DashboardPage extends StatelessWidget {
                       color: color.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8)),
                   child: Text("YTD",
-                      style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          color: color,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold)),
                 )
               ],
             ),
@@ -579,7 +485,7 @@ class DashboardPage extends StatelessWidget {
 }
 
 /// --------------------------------------------------------------------------
-/// 4. SMART MAP PAGE
+/// SMART MAP PAGE
 /// --------------------------------------------------------------------------
 
 class SmartMapPage extends StatelessWidget {
@@ -588,13 +494,14 @@ class SmartMapPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final umkmProvider = Provider.of<UmkmProvider>(context);
+    final sentraProvider = Provider.of<SentraProvider>(context);
 
     return Scaffold(
       body: Stack(
         children: [
           FlutterMap(
             options: const MapOptions(
-              initialCenter: LatLng(-6.9932, 110.4203), // Semarang Center
+              initialCenter: LatLng(-6.9932, 110.4203),
               initialZoom: 13.5,
             ),
             children: [
@@ -602,6 +509,19 @@ class SmartMapPage extends StatelessWidget {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.semarang_umkm_map',
               ),
+              // Sentra Zone Circles
+              CircleLayer(
+                circles: sentraProvider.sentraList.map((sentra) {
+                  return CircleMarker(
+                    point: sentra.pusatLokasi,
+                    radius: sentra.radiusCoverage * 80, // Scale for visibility
+                    color: Color(sentra.getColorValue()).withOpacity(0.15),
+                    borderColor: Color(sentra.getColorValue()),
+                    borderStrokeWidth: 2,
+                  );
+                }).toList(),
+              ),
+              // UMKM Markers
               MarkerLayer(
                 markers: umkmProvider.umkmList.map((umkm) {
                   return Marker(
@@ -615,16 +535,18 @@ class SmartMapPage extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.location_on,
-                            color: umkm.getStatusColor(),
+                            color: _getStatusColor(umkm.analyzeUmkmHealth()),
                             size: 40,
                           ),
                           Flexible(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 4, vertical: 2),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.grey, width: 0.5),
+                                border:
+                                    Border.all(color: Colors.grey, width: 0.5),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.1),
@@ -636,7 +558,8 @@ class SmartMapPage extends StatelessWidget {
                               child: Text(
                                 umkm.nama,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontSize: 8, fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 2,
                               ),
@@ -650,6 +573,7 @@ class SmartMapPage extends StatelessWidget {
               ),
             ],
           ),
+          // Header Card
           Positioned(
             top: 50,
             left: 20,
@@ -657,7 +581,8 @@ class SmartMapPage extends StatelessWidget {
             child: Card(
               color: Colors.white.withOpacity(0.95),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     const Icon(Icons.map, color: Color(0xFF0D47A1)),
@@ -673,6 +598,7 @@ class SmartMapPage extends StatelessWidget {
               ),
             ),
           ),
+          // Legend
           Positioned(
             bottom: 20,
             left: 20,
@@ -682,12 +608,50 @@ class SmartMapPage extends StatelessWidget {
                 _buildLegendItem(Colors.green, "Mandiri (>200jt)"),
                 _buildLegendItem(Colors.amber, "Berkembang (50-200jt)"),
                 _buildLegendItem(Colors.red, "Perlu Bantuan (<50jt)"),
+                const SizedBox(height: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.purple, width: 2),
+                          color: Colors.purple.withOpacity(0.2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text("Zona Sentra",
+                          style: TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(UmkmStatus status) {
+    switch (status) {
+      case UmkmStatus.mandiri:
+        return Colors.green;
+      case UmkmStatus.berkembang:
+        return Colors.amber;
+      case UmkmStatus.perluBantuan:
+        return Colors.red;
+    }
   }
 
   Widget _buildLegendItem(Color color, String label) {
@@ -702,7 +666,9 @@ class SmartMapPage extends StatelessWidget {
         children: [
           CircleAvatar(backgroundColor: color, radius: 4),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -712,6 +678,7 @@ class SmartMapPage extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
         return Container(
           decoration: const BoxDecoration(
@@ -744,14 +711,17 @@ class SmartMapPage extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                        color: umkm.getStatusColor().withOpacity(0.1),
+                        color: _getStatusColor(umkm.analyzeUmkmHealth())
+                            .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20)),
                     child: Text(
                       umkm.getStatusText(),
                       style: TextStyle(
-                          color: umkm.getStatusColor(), fontWeight: FontWeight.bold),
+                          color: _getStatusColor(umkm.analyzeUmkmHealth()),
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -761,7 +731,8 @@ class SmartMapPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.store, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(umkm.kategori, style: GoogleFonts.poppins(color: Colors.grey)),
+                  Text(umkm.kategori,
+                      style: GoogleFonts.poppins(color: Colors.grey)),
                   const SizedBox(width: 16),
                   const Icon(Icons.location_city, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
@@ -774,6 +745,8 @@ class SmartMapPage extends StatelessWidget {
                 ],
               ),
               const Divider(height: 32),
+              
+              // Omzet
               Row(
                 children: [
                   Expanded(
@@ -794,15 +767,79 @@ class SmartMapPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D47A1),
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text("Tutup"),
-                  )
                 ],
+              ),
+              
+              // NEW: Bahan Baku & Alat Produksi
+              if (umkm.bahanBakuList.isNotEmpty || umkm.alatProduksiList.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                
+                if (umkm.bahanBakuList.isNotEmpty) ...[
+                  Text("🏭 Bahan Baku",
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, fontSize: 14)),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: umkm.bahanBakuList.map((b) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.green.withOpacity(0.3)),
+                        ),
+                        child: Text(b.nama,
+                            style: const TextStyle(
+                                fontSize: 11, color: Colors.green)),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                
+                if (umkm.alatProduksiList.isNotEmpty) ...[
+                  Text("🔧 Alat Produksi",
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, fontSize: 14)),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: umkm.alatProduksiList.map((a) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                        ),
+                        child: Text(a.nama,
+                            style:
+                                const TextStyle(fontSize: 11, color: Colors.blue)),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ],
+              
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0D47A1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text("Tutup"),
+                ),
               ),
             ],
           ),
@@ -813,7 +850,7 @@ class SmartMapPage extends StatelessWidget {
 }
 
 /// --------------------------------------------------------------------------
-/// 5. INPUT DATA PAGE
+/// INPUT DATA PAGE
 /// --------------------------------------------------------------------------
 
 class InputDataPage extends StatefulWidget {
@@ -825,21 +862,28 @@ class InputDataPage extends StatefulWidget {
 
 class _InputDataPageState extends State<InputDataPage> {
   final _formKey = GlobalKey<FormState>();
-  
+
   final _namaController = TextEditingController();
   final _alamatController = TextEditingController();
   final _omzetController = TextEditingController();
   String _selectedKategori = 'Kuliner';
 
-  final List<String> _kategoriOptions = ['Kuliner', 'Fashion', 'Kriya', 'Oleh-oleh', 'Jasa'];
+  // NEW: Selected materials and equipment
+  List<BahanBaku> _selectedMaterials = [];
+  List<AlatProduksi> _selectedEquipment = [];
+
+  final List<String> _kategoriOptions = [
+    'Kuliner',
+    'Fashion',
+    'Kriya',
+    'Oleh-oleh',
+    'Jasa'
+  ];
 
   void _submitData() {
     if (_formKey.currentState!.validate()) {
-      // Simulation Logic
       final random = Random();
-      
-      // Random location around Semarang center (-6.9932, 110.4203)
-      // Variation approx +/- 0.02 degrees
+
       final lat = -6.9932 + (random.nextDouble() * 0.04 - 0.02);
       final lng = 110.4203 + (random.nextDouble() * 0.04 - 0.02);
 
@@ -848,14 +892,20 @@ class _InputDataPageState extends State<InputDataPage> {
         nama: _namaController.text,
         alamat: _alamatController.text,
         kategori: _selectedKategori,
-        omzet: double.parse(_omzetController.text.replaceAll(RegExp(r'[^0-9]'), '')), // Simple parsing
+        omzet:
+            double.parse(_omzetController.text.replaceAll(RegExp(r'[^0-9]'), '')),
         lokasi: LatLng(lat, lng),
+        bahanBakuList: _selectedMaterials,
+        alatProduksiList: _selectedEquipment,
       );
 
-      // Add to Provider
       Provider.of<UmkmProvider>(context, listen: false).addUmkm(newUmkm);
 
-      // Show Dialog
+      // Re-run sentra analysis
+      final umkmProvider = Provider.of<UmkmProvider>(context, listen: false);
+      Provider.of<SentraProvider>(context, listen: false)
+          .analyzeAndGenerateSentra(umkmProvider.umkmList);
+
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -867,15 +917,21 @@ class _InputDataPageState extends State<InputDataPage> {
             ],
           ),
           content: Text(
-              "UMKM '${newUmkm.nama}' telah ditambahkan ke database.\nLokasi terdeteksi otomatis oleh sistem di:\nLat: ${lat.toStringAsFixed(4)}, Lng: ${lng.toStringAsFixed(4)}"),
+              "UMKM '${newUmkm.nama}' telah ditambahkan ke database.\n"
+              "Bahan baku: ${_selectedMaterials.length} item\n"
+              "Alat produksi: ${_selectedEquipment.length} item\n"
+              "Lokasi: Lat ${lat.toStringAsFixed(4)}, Lng ${lng.toStringAsFixed(4)}"),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(ctx); // Close Dialog
-                // Reset Form
+                Navigator.pop(ctx);
                 _namaController.clear();
                 _alamatController.clear();
                 _omzetController.clear();
+                setState(() {
+                  _selectedMaterials = [];
+                  _selectedEquipment = [];
+                });
               },
               child: const Text("OK"),
             )
@@ -901,9 +957,10 @@ class _InputDataPageState extends State<InputDataPage> {
                 style: GoogleFonts.poppins(
                     fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const Text("Isi data berikut untuk menambahkan UMKM baru ke sistem."),
+              const Text("Isi data untuk menambahkan UMKM baru ke sistem."),
               const SizedBox(height: 24),
 
+              // Nama Usaha
               TextFormField(
                 controller: _namaController,
                 decoration: const InputDecoration(
@@ -911,10 +968,12 @@ class _InputDataPageState extends State<InputDataPage> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.store),
                 ),
-                validator: (val) => val == null || val.isEmpty ? "Wajib diisi" : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? "Wajib diisi" : null,
               ),
               const SizedBox(height: 16),
 
+              // Alamat
               TextFormField(
                 controller: _alamatController,
                 decoration: const InputDecoration(
@@ -922,10 +981,12 @@ class _InputDataPageState extends State<InputDataPage> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.location_on_outlined),
                 ),
-                validator: (val) => val == null || val.isEmpty ? "Wajib diisi" : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? "Wajib diisi" : null,
               ),
               const SizedBox(height: 16),
 
+              // Kategori
               DropdownButtonFormField<String>(
                 value: _selectedKategori,
                 decoration: const InputDecoration(
@@ -940,6 +1001,7 @@ class _InputDataPageState extends State<InputDataPage> {
               ),
               const SizedBox(height: 16),
 
+              // Omzet
               TextFormField(
                 controller: _omzetController,
                 keyboardType: TextInputType.number,
@@ -949,10 +1011,104 @@ class _InputDataPageState extends State<InputDataPage> {
                   prefixIcon: Icon(Icons.monetization_on_outlined),
                   hintText: "Contoh: 150000000",
                 ),
-                validator: (val) => val == null || val.isEmpty ? "Wajib diisi" : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? "Wajib diisi" : null,
+              ),
+              const SizedBox(height: 24),
+
+              // NEW: Bahan Baku Section
+              Text(
+                "🏭 Bahan Baku",
+                style: GoogleFonts.poppins(
+                    fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: _selectedMaterials.map((m) {
+                        return Chip(
+                          label: Text(m.nama, style: const TextStyle(fontSize: 12)),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () {
+                            setState(() {
+                              _selectedMaterials.remove(m);
+                            });
+                          },
+                          backgroundColor: Colors.green.withOpacity(0.1),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showMaterialPicker(),
+                        icon: const Icon(Icons.add),
+                        label: const Text("Tambah Bahan Baku"),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // NEW: Alat Produksi Section
+              Text(
+                "🔧 Alat Produksi",
+                style: GoogleFonts.poppins(
+                    fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: _selectedEquipment.map((e) {
+                        return Chip(
+                          label: Text(e.nama, style: const TextStyle(fontSize: 12)),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () {
+                            setState(() {
+                              _selectedEquipment.remove(e);
+                            });
+                          },
+                          backgroundColor: Colors.blue.withOpacity(0.1),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showEquipmentPicker(),
+                        icon: const Icon(Icons.add),
+                        label: const Text("Tambah Alat Produksi"),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 32),
 
+              // Submit Button
               SizedBox(
                 height: 50,
                 child: ElevatedButton.icon(
@@ -967,7 +1123,7 @@ class _InputDataPageState extends State<InputDataPage> {
                   label: const Text("SIMPAN DATA UMKM"),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
               const Center(
                 child: Text(
@@ -979,6 +1135,162 @@ class _InputDataPageState extends State<InputDataPage> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showMaterialPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          maxChildSize: 0.9,
+          minChildSize: 0.5,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Pilih Bahan Baku",
+                    style: GoogleFonts.poppins(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: MockMaterialCatalog.allMaterials.length,
+                      itemBuilder: (context, index) {
+                        final material = MockMaterialCatalog.allMaterials[index];
+                        final isSelected = _selectedMaterials.contains(material);
+                        return ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.inventory_2,
+                                color: Colors.green),
+                          ),
+                          title: Text(material.nama),
+                          subtitle:
+                              Text("${material.kategori} • ${material.satuan}"),
+                          trailing: isSelected
+                              ? const Icon(Icons.check_circle,
+                                  color: Colors.green)
+                              : const Icon(Icons.add_circle_outline),
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                _selectedMaterials.remove(material);
+                              } else {
+                                _selectedMaterials.add(material);
+                              }
+                            });
+                            Navigator.pop(context);
+                            _showMaterialPicker(); // Reopen to continue selecting
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Selesai"),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showEquipmentPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          maxChildSize: 0.9,
+          minChildSize: 0.5,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Pilih Alat Produksi",
+                    style: GoogleFonts.poppins(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: MockEquipmentCatalog.allEquipment.length,
+                      itemBuilder: (context, index) {
+                        final equipment =
+                            MockEquipmentCatalog.allEquipment[index];
+                        final isSelected =
+                            _selectedEquipment.contains(equipment);
+                        return ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.precision_manufacturing,
+                                color: Colors.blue),
+                          ),
+                          title: Text(equipment.nama),
+                          subtitle: Text(
+                              "${equipment.kategori} • ${equipment.jenisAlat}"),
+                          trailing: isSelected
+                              ? const Icon(Icons.check_circle,
+                                  color: Colors.blue)
+                              : const Icon(Icons.add_circle_outline),
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                _selectedEquipment.remove(equipment);
+                              } else {
+                                _selectedEquipment.add(equipment);
+                              }
+                            });
+                            Navigator.pop(context);
+                            _showEquipmentPicker(); // Reopen to continue selecting
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Selesai"),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
