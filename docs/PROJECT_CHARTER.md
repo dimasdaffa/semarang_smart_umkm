@@ -528,19 +528,39 @@ Legend: ████ Active  ░░░░ Idle
 
 ---
 
-## 8. ESTIMASI ANGGARAN
+## 8. NILAI PROYEK DAN ANGGARAN
 
-### 8.1 Cost Breakdown Structure
+### 8.1 Ringkasan Nilai Proyek
+
+| **Aspek** | **Detail** |
+|-----------|------------|
+| **Nilai Kontrak Proyek** | **Rp 400.000.000** (Empat Ratus Juta Rupiah) |
+| **Durasi Proyek** | 12 Minggu (3 Bulan) |
+| **Jumlah Tim** | 5 Orang |
+| **Model Pembayaran** | Termin 3x (30% - 40% - 30%) |
+
+### 8.2 Termin Pembayaran
+
+| **Termin** | **Milestone** | **Persentase** | **Nominal** | **Target** |
+|------------|---------------|----------------|-------------|------------|
+| Termin 1 | Kick-off & Planning Complete | 30% | Rp 120.000.000 | Minggu 2 |
+| Termin 2 | Development Complete (UAT Ready) | 40% | Rp 160.000.000 | Minggu 10 |
+| Termin 3 | Go-Live & Handover | 30% | Rp 120.000.000 | Minggu 12 |
+| **TOTAL** | | **100%** | **Rp 400.000.000** | |
+
+---
+
+### 8.3 Cost Breakdown Structure
 
 | **Kategori** | **Item** | **Satuan** | **Vol** | **Harga** | **Total** |
 |--------------|----------|-----------|---------|-----------|-----------|
 | **SDM** | | | | | |
-| | Senior Flutter Developer | Man-month | 3 | Rp 25.000.000 | Rp 75.000.000 |
-| | Junior Flutter Developer | Man-month | 3 | Rp 15.000.000 | Rp 45.000.000 |
-| | UI/UX Designer | Man-month | 2 | Rp 18.000.000 | Rp 36.000.000 |
-| | Project Manager | Man-month | 3 | Rp 20.000.000 | Rp 60.000.000 |
-| | QA Engineer | Man-month | 1.5 | Rp 15.000.000 | Rp 22.500.000 |
-| **Subtotal SDM** | | | | | **Rp 238.500.000** |
+| | Lead Developer (Ahmad Fariz) | Man-month | 3 | Rp 25.000.000 | Rp 75.000.000 |
+| | Backend Developer (Budi Santoso) | Man-month | 3 | Rp 18.000.000 | Rp 54.000.000 |
+| | Frontend Developer (Rina Kusuma) | Man-month | 3 | Rp 18.000.000 | Rp 54.000.000 |
+| | Project Manager (Dimas Daffa) | Man-month | 3 | Rp 20.000.000 | Rp 60.000.000 |
+| | QA Engineer (Siti Aminah) | Man-month | 3 | Rp 15.000.000 | Rp 45.000.000 |
+| **Subtotal SDM** | | | | | **Rp 288.000.000** |
 | **Infrastruktur** | | | | | |
 | | Development Devices | Unit | 3 | Rp 5.000.000 | Rp 15.000.000 |
 | | Map API (if needed) | Subscription | 6 | Rp 1.500.000 | Rp 9.000.000 |
@@ -551,12 +571,74 @@ Legend: ████ Active  ░░░░ Idle
 | | Focus Group Discussion | Kegiatan | 2 | Rp 3.000.000 | Rp 6.000.000 |
 | | Training Pengguna | Kegiatan | 2 | Rp 4.000.000 | Rp 8.000.000 |
 | **Subtotal Operasional** | | | | | **Rp 29.000.000** |
-| **Contingency (10%)** | | | | | **Rp 30.650.000** |
 | | | | | | |
-| **GRAND TOTAL** | | | | | **Rp 337.150.000** |
+| **TOTAL BIAYA** | | | | | **Rp 356.000.000** |
+
+---
+
+### 8.4 Distribusi Keuntungan Tim
+
+| **No** | **Nama** | **Role** | **Gaji (3 bln)** | **Profit Share** | **Total Pendapatan** |
+|--------|----------|----------|------------------|------------------|----------------------|
+| 1 | **Dimas Daffa** | Project Manager | Rp 60.000.000 | Rp 12.000.000 (27%) | **Rp 72.000.000** |
+| 2 | **Ahmad Fariz** | Lead Developer | Rp 75.000.000 | Rp 11.000.000 (25%) | **Rp 86.000.000** |
+| 3 | **Rina Kusuma** | Frontend Developer | Rp 54.000.000 | Rp 8.800.000 (20%) | **Rp 62.800.000** |
+| 4 | **Budi Santoso** | Backend Developer | Rp 54.000.000 | Rp 8.000.000 (18%) | **Rp 62.000.000** |
+| 5 | **Siti Aminah** | QA Engineer | Rp 45.000.000 | Rp 4.400.000 (10%) | **Rp 49.400.000** |
+| | **TOTAL** | | **Rp 288.000.000** | **Rp 44.200.000** | **Rp 332.200.000** |
+
+### 8.5 Perhitungan Profit
+
+```
+Nilai Kontrak              : Rp 400.000.000
+─────────────────────────────────────────
+(-) Biaya SDM              : Rp 288.000.000
+(-) Biaya Infrastruktur    : Rp  39.000.000
+(-) Biaya Operasional      : Rp  29.000.000
+─────────────────────────────────────────
+= GROSS PROFIT             : Rp  44.000.000
+─────────────────────────────────────────
+Profit Margin              : 11%
+```
+
+### 8.6 Profit Sharing Mechanism
+
+| **Level** | **Persentase dari Profit** | **Basis** |
+|-----------|---------------------------|-----------|
+| Project Manager | 27% | Tanggung jawab keseluruhan, koordinasi |
+| Lead Developer | 25% | Technical leadership, code review |
+| Frontend Developer | 20% | UI/UX implementation volume |
+| Backend Developer | 18% | Services & algorithm complexity |
+| QA Engineer | 10% | Testing & documentation |
+| **TOTAL** | **100%** | |
+
+> [!IMPORTANT]
+> Profit sharing didistribusikan setelah pembayaran **Termin 3** diterima dari klien dan seluruh kewajiban proyek telah diselesaikan.
+
+### 8.7 Ringkasan Pendapatan Per Anggota
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    PENDAPATAN TIM SUSMAS v2.0                        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  Dimas Daffa (PM)         ████████████████████████████  Rp 72.0 Jt  │
+│  Ahmad Fariz (Lead)       ██████████████████████████████ Rp 86.0 Jt │
+│  Rina Kusuma (Frontend)   ██████████████████████        Rp 62.8 Jt  │
+│  Budi Santoso (Backend)   █████████████████████         Rp 62.0 Jt  │
+│  Siti Aminah (QA)         █████████████████             Rp 49.4 Jt  │
+│                                                                      │
+│  ─────────────────────────────────────────────────────────────────  │
+│  TOTAL NILAI KONTRAK:              Rp 400.000.000                   │
+│  TOTAL PENDAPATAN TIM:             Rp 332.200.000                   │
+│  SISA (Infrastruktur + Ops):       Rp  67.800.000                   │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 > [!NOTE]
-> Anggaran di atas adalah estimasi untuk Fase 1. Angka aktual dapat bervariasi tergantung kebijakan instansi dan vendor yang dipilih.
+> - Nilai di atas adalah estimasi berdasarkan asumsi tidak ada scope creep
+> - Overtime atau penambahan fitur akan dikenakan biaya tambahan
+> - Pajak (PPh 21) ditanggung masing-masing individu
 
 ---
 
