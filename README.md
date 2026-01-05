@@ -153,7 +153,7 @@ flutter build web --release
 ![alt text](image-5.png)
 ## 📄 Lisensi
 
-© 2026 Dinas Koperasi dan UMKM Kota Semarang
+© 2026 Dimas Daffa
 
 ---
 
